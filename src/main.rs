@@ -64,6 +64,7 @@ enum Interval {
 impl Interval {
     fn get_third(self) -> String {
         match self {
+            Interval::MinorSecond => "sus(b2)".into(),
             Interval::MajorSecond => "sus2".into(),
             Interval::MinorThird => "m".into(),
             Interval::MajorThird => "".into(),
@@ -83,8 +84,7 @@ impl Chord {
         let bass_note = notes[0].get_name();
 
         for &root in &notes {
-            let relative_form: Vec<Note> = self
-                .notes
+            let relative_form: Vec<Note> = notes
                 .iter()
                 .map(|&x| Note {
                     index: (12 + x.index - root.index) % 12,
@@ -95,15 +95,28 @@ impl Chord {
             rel_sorted.sort();
 
             if let Some(name) = Chord::get_name_from_relative_form(rel_sorted) {
-                if root.get_name() == bass_note {
-                    names.push(format!("{}{}", root.get_name(), name));
-                }
-                if root.get_name() != bass_note {
-                    names.push(format!("{}/{}{}", bass_note, root.get_name(), name));
-                }
+                names.push(format!("{}{}", root.get_name(), name));
+            }
+
+            if root.get_name() == bass_note {
+                continue;
+            }
+
+            let relative_form: Vec<Note> = notes
+                .iter()
+                .skip(1)
+                .map(|&x| Note {
+                    index: (12 + x.index - root.index) % 12,
+                    octave: x.octave,
+                })
+                .collect();
+            let mut rel_sorted = relative_form.clone();
+            rel_sorted.sort();
+
+            if let Some(name) = Chord::get_name_from_relative_form(rel_sorted) {
+                names.push(format!("{}{}/{}", root.get_name(), name, bass_note));
             }
         }
-        names.sort_by(|x, y| x.len().cmp(&y.len()));
         names
     }
 
@@ -115,11 +128,16 @@ impl Chord {
         if size == 1 {
             return Some("".into());
         }
-        if size == 2 {
-            return Some("5".into());
-        }
 
         let mut has_interval = [false; 12];
+        if size == 2 {
+            if has_interval[7] {
+                return Some("5".into());
+            } else {
+                return None;
+            }
+        }
+
         for note in &relative_form {
             has_interval[note.index] = true;
         }
@@ -136,6 +154,9 @@ impl Chord {
         } else if has_interval[2] {
             has_interval[2] = false;
             Some(Interval::MajorSecond)
+        } else if has_interval[1] {
+            has_interval[1] = false;
+            Some(Interval::MinorSecond)
         } else {
             None
         };
@@ -149,6 +170,9 @@ impl Chord {
         } else if has_interval[9] {
             has_interval[9] = false;
             Some(Interval::Sixth)
+        } else if has_interval[8] {
+            has_interval[8] = false;
+            Some(Interval::SharpFifth)
         } else {
             None
         };
@@ -216,6 +240,8 @@ impl Chord {
                     "6".into()
                 }
             }
+            Some(Interval::SharpFifth) => "b6".into(),
+
             _ => String::new(),
         };
 
@@ -241,15 +267,15 @@ impl Chord {
                         ext = "9".into();
                     } else if ext == "maj7" {
                         ext = "maj9".into();
-                    } else if ext == "6" {
-                        add.push("add9".into());
+                    } else if ext == "6" || ext == "b6" {
+                        add.push("/9".into());
                     } else if ext.is_empty() {
                         add.push("add9".into());
                     }
                 }
                 Interval::MinorSecond => {
-                    if ext.is_empty() {
-                        ext.push_str("addb9");
+                    if ext.is_empty() && !quality.contains("sus") {
+                        add.push("addb9".into());
                     } else {
                         alters.push("b9".into());
                     }
@@ -272,15 +298,17 @@ impl Chord {
                         ext = "11".into();
                     } else if ext == "maj9" || ext == "maj7" {
                         ext = "maj11".into();
-                    } else if ext.is_empty() || ext == "6" {
+                    } else if ext == "6" || ext == "b6" {
+                        add.push("/11".into());
+                    } else if ext.is_empty() {
                         add.push("add11".into());
                     }
                 }
                 Interval::Tritone => {
                     if ext.is_empty() {
-                        add.push("add#11".into());
+                        alters.push("add#11".into());
                     } else {
-                        ext.push_str("#11".into());
+                        alters.push("#11".into());
                     }
                 }
                 _ => {}
@@ -296,15 +324,11 @@ impl Chord {
                         } else {
                             "13".into()
                         };
-                    } else if ext.is_empty() {
-                        ext = "6".into();
                     }
                 }
                 Interval::SharpFifth => {
                     if has_7 || ext.contains("9") || ext.contains("11") || ext.contains("maj") {
                         alters.push("b13".into());
-                    } else if ext.is_empty() {
-                        add.push("addb13".into());
                     } else {
                         alters.push("b13".into());
                     }
@@ -360,6 +384,7 @@ fn main() {
             Note::from_midi(60), // C
             Note::from_midi(64), // E
             Note::from_midi(67), // G
+            Note::from_midi(69),
             Note::from_midi(71),
         ],
     };
