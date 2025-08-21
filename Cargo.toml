@@ -2,5 +2,10 @@
 name = "meowsic"
 version = "0.1.0"
 edition = "2024"
+description = "notes to chord names :)"
+license-file = "LICENSE.md"
+readme-file = "README.md"
+repository = "https://github.com/dvdtsb/meowsic"
+
 
 [dependencies]

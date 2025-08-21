@@ -378,17 +378,11 @@ impl Chord {
         Some(res)
     }
 }
-fn main() {
-    let chord = Chord {
-        notes: vec![
-            Note::from_midi(60), // C
-            Note::from_midi(64), // E
-            Note::from_midi(67), // G
-            Note::from_midi(69),
-            Note::from_midi(71),
-        ],
-    };
-    println!("{:?}", chord.get_names());
+
+pub fn get_chords(notes: &Vec<u8>) -> Vec<String> {
+    let notes = notes.iter().map(|&x| Note::from_midi(x)).collect();
+
+    Chord { notes }.get_names()
 }
 
 #[cfg(test)]
