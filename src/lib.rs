@@ -7,7 +7,7 @@
 //!
 //! fn main() {
 //!     println!("{:?}", get_chords(&vec![60, 64, 67, 71]));
-//!     //["Cmaj7", "Emb6", "Em/C", "G6/11", "G6/C", "Bb6sus4(b9)", "Bb6sus4/C"]
+//!     //["Cmaj7", "Em(b6)", "Em/C", "G6/11", "G6/C", "Bsus4(b6,b9)", "Bsus4(b6)/C"]
 //! }
 //! ```
 //!
@@ -244,23 +244,27 @@ impl Chord {
             (None, _) => "".into(),
         };
 
-        let mut ext = match seventhish {
-            Some(Interval::MajorSeventh) => "maj7".into(),
-            Some(Interval::MinorSeventh) => "7".into(),
-            Some(Interval::Sixth) => {
-                if quality == "dim" {
-                    "7".into()
-                } else {
-                    "6".into()
-                }
-            }
-            Some(Interval::SharpFifth) => "b6".into(),
-
-            _ => String::new(),
-        };
-
+        let mut ext: String = "".into();
         let mut alters: Vec<String> = Vec::new();
         let mut add: Vec<String> = Vec::new();
+
+        match seventhish {
+            Some(Interval::MajorSeventh) => ext = "maj7".into(),
+            Some(Interval::MinorSeventh) => ext = "7".into(),
+            Some(Interval::Sixth) => {
+                ext = {
+                    if quality == "dim" {
+                        "7".into()
+                    } else {
+                        "6".into()
+                    }
+                }
+            }
+            Some(Interval::SharpFifth) => alters.push("b6".into()),
+            None => (),
+
+            _ => unreachable!(),
+        };
 
         if let Some(fv) = fifth {
             match (fv, third) {
