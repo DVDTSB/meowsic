@@ -1,3 +1,18 @@
+//! notes -> chords :3
+//!
+//! u just do:
+//!
+//! ```rust
+//! use meowsic::get_chords;
+//!
+//! fn main() {
+//!     println!("{:?}", get_chords(&vec![60, 64, 67, 71]));
+//!     //["Cmaj7", "Emb6", "Em/C", "G6/11", "G6/C", "Bb6sus4(b9)", "Bb6sus4/C"]
+//! }
+//! ```
+//!
+//! the numbers there are midi notes btw!
+
 #![no_std]
 
 extern crate alloc;
@@ -5,14 +20,14 @@ extern crate alloc;
 use alloc::{format, string::String, vec::Vec};
 use core::cmp::Ordering;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct Note {
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Note {
     octave: usize,
     index: usize,
 }
 
 impl Note {
-    pub fn from_midi(midi_note: u8) -> Self {
+    fn from_midi(midi_note: u8) -> Self {
         let midi_note = midi_note as usize;
         let m = midi_note - 21;
         let index = m % 12;
@@ -24,12 +39,6 @@ impl Note {
             "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#",
         ];
         names[self.index % 12].into()
-    }
-    pub fn get_name_idx(idx: usize) -> String {
-        let names = [
-            "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#",
-        ];
-        names[idx % 12].into()
     }
 }
 
@@ -47,7 +56,7 @@ impl PartialOrd for Note {
     }
 }
 
-pub struct Chord {
+struct Chord {
     notes: Vec<Note>,
 }
 
@@ -80,7 +89,7 @@ impl Interval {
 }
 
 impl Chord {
-    pub fn get_names(&self) -> Vec<String> {
+    fn get_names(&self) -> Vec<String> {
         let mut names = Vec::new();
 
         let mut notes = self.notes.clone();
@@ -125,7 +134,7 @@ impl Chord {
         names
     }
 
-    pub fn get_name_from_relative_form(relative_form: Vec<Note>) -> Option<String> {
+    fn get_name_from_relative_form(relative_form: Vec<Note>) -> Option<String> {
         let size = relative_form.len();
         if size == 0 {
             return None;
