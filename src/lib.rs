@@ -1,3 +1,10 @@
+#![no_std]
+
+extern crate alloc;
+
+use alloc::{format, string::String, vec::Vec};
+use core::cmp::Ordering;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Note {
     octave: usize,
@@ -25,8 +32,6 @@ impl Note {
         names[idx % 12].into()
     }
 }
-
-use std::cmp::Ordering;
 
 impl Ord for Note {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -388,6 +393,7 @@ pub fn get_chords(notes: &Vec<u8>) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     #[test]
     fn test_cmaj7() {
@@ -399,7 +405,7 @@ mod tests {
                 Note::from_midi(71), // B
             ],
         };
-        assert!(chord.get_names().contains(&"Cmaj7".to_string()));
+        assert!(chord.get_names().contains(&"Cmaj7".into()));
     }
 
     #[test]
@@ -413,7 +419,7 @@ mod tests {
                 Note::from_midi(74), // D
             ],
         };
-        assert!(chord.get_names().contains(&"Cmaj9".to_string()));
+        assert!(chord.get_names().contains(&"Cmaj9".into()));
     }
 
     #[test]
@@ -428,7 +434,7 @@ mod tests {
                 Note::from_midi(81), // A
             ],
         };
-        assert!(chord.get_names().contains(&"Cmaj13".to_string()));
+        assert!(chord.get_names().contains(&"Cmaj13".into()));
     }
 
     #[test]
@@ -440,6 +446,6 @@ mod tests {
                 Note::from_midi(67), // G
             ],
         };
-        assert!(chord.get_names().contains(&"Csus4".to_string()));
+        assert!(chord.get_names().contains(&"Csus4".into()));
     }
 }

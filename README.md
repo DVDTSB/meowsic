@@ -1,6 +1,6 @@
 # meowsic
 
-notes -> chord name in rust :)
+notes -> chord name in rust (`no-std` friendly too) :)
 
 ## use
 
